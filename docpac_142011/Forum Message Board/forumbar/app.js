@@ -6,6 +6,7 @@ app.use(express.urlencoded({ extended: false }));
 app.set('view engine', 'ejs');
 
 const accessDb = require('./database.js');
+const bcrypt = require('bcrypt');
 
 //Session Set Up
 const session = require("express-session");
@@ -49,7 +50,7 @@ app.post('/register', (req, res) => {
 
                 if(query.name.length >= 3 && query.name.length <= 20){
                   
-                  if(accessDb.uGetUname){
+                  if(accessDb.uGetUname(query.name.trim())){
                     res.locals.error = "Username Taken"
                     res.status(200).render('register');
                   } else {
@@ -63,7 +64,7 @@ app.post('/register', (req, res) => {
                       });
 
                       accessDb.uAdd(query.name.trim(), crypted_pass)
-                      res.redirect('/login')
+                      res.redirect('/')
                   }
 
                 } else {
@@ -83,6 +84,63 @@ app.post('/register', (req, res) => {
     })
 });
 
+app.get('/login', (req, res) => {
+  if (req.session.userId){
+    res.redirect('/')
+  } else {
+    res.locals.title = "Log In";
+    res.locals.error = false
+    res.status(200).render('login');
+  }
+});
+
+app.post('/login', (req, res) => {
+  res.locals.title = "Log In";
+  req.on('data', chunk => {
+        body += chunk.toString();
+    });
+    req.on('end', () => {
+        res.locals.title = "Log In"
+        if(query.name.trim() && query.passW.trim()){
+            if(accessDb.uGetUname(query.name.trim())){
+
+              let passGood = false
+                bcrypt.compare(query.passW.trim(), accessDb.uGetUname(query.name.trim()).password_hash, function (err, result) {
+                  if (err) {
+                    console.error(err);
+                    return;
+                  }
+                  if (result) {
+                    passGood = true
+                  } else {}
+                });
+
+                if (passGood){
+                    let account = accessDb.uGetUname(query.name.trim())
+                    req.session.userId = account.id
+                    res.redirect("/")
+                } else {
+                  res.locals.error = 'Incorrect Password'
+                  res.status(200).render('login');
+                }
+
+            } else {
+                res.locals.error = 'No Account With Username Exists'
+                res.status(200).render('login');
+            }
+
+        } else {
+            res.locals.error = 'Must Fill All Boxes'
+            res.status(200).render('login');
+        }
+
+    });
+});
+
+
+app.post('/logout', (req, res) => {
+
+})
 
 
 
