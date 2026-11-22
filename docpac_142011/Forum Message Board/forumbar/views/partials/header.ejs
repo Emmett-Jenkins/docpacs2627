@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+
+<head>
+  <meta charset="UTF-8">
+  <title><%- title %></title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<header>
+  <button id="naviButton" onclick='location.replace("/")'>Home</button>
+  <% if(username){ %>
+    <button id="naviButton" onclick='location.replace("/newThread")'>Create A New Thread</button>
+  <% } else { %>
+    <button id="naviButton" onclick='location.replace("/login")'>Log In</button>
+    <button id="naviButton" onclick='location.replace("/register")'>Register</button>
+  <% } %>
+
+  <% if(username){ %>
+    <button id="naviButton" onclick='location.replace("/newThread")'>Log Out</button>
+    <%= username %>
+  <% } %>
+</header>

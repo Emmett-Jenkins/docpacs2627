@@ -22,9 +22,9 @@ db.exec(`
 `);
 
 db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
+  CREATE TABLE IF NOT EXISTS replies (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    thread_id INTEGER NOT NULL UNIQUE,
+    thread_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
     body TEXT NOT NULL,
     created_at DEFAULT CURRENT_DATE
@@ -35,17 +35,21 @@ class accessDb {
     constructor() {
         this.u1 = db.prepare('INSERT INTO users (username, password_hash) VALUES (?, ?)');
         this.u2 = db.prepare('SELECT * FROM users WHERE username = ?');
+        this.u3 = db.prepare('SELECT * FROM users WHERE id = ?');
     }
     uAdd(name, password){
         if (name){} else {name = null;}
         if (password){} else {password = null;}
-        this.a.run(name, password);
+        this.u1.run(name, password);
     }
     uGetUname(name){
-      this.u2.get(name)
+      return this.u2.get(name)
+    }
+    uGetId(id){
+      return this.u3.get(id)
     }
 }
 
 console.log('database connected');
 
-module.exports = accessDb;
+module.exports = new accessDb();
